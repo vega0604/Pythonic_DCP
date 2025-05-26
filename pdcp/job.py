@@ -32,7 +32,7 @@ class Job:
 
         self.results = []
 
-        self.job.fs.add()
+        # self.job.fs.add()
 
         self.subscribe_to({
             "result": lambda e: self.results.append(e.result)

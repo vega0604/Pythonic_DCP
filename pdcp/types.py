@@ -29,3 +29,4 @@ class JobConfig(TypedDict):
     stream_slices: NotRequired[bool]
     constant_params: NotRequired[list[any]]
     compute_groups: NotRequired[list[ComputeGroup]]
+    job_dependencies: NotRequired[list[str]]

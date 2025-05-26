@@ -6,24 +6,29 @@ PDCP is a Python package that provides a more Pythonic interface to the DCP Pyth
 
 - **Type-Safe Configuration**: Full type hints using TypedDict for job configuration
 - **Event Handling**: Flexible event subscription system for job monitoring
-- **Job Chaining**: Basic workflow management through job dependencies
+- **Job Chaining**: Basic workflow management through job chaining
 - **Compute Groups**: Support for DCP compute group management
 - **Streaming Slices**: Optional streaming support for job slices
 
-<!-- ## Installation
+## Requirements
+PDCP requires a python version between (3.10, 4.0] and the latest node version
+
+## Installation
 
 ```bash
 pip install pdcp
-``` -->
+```
 
 ## Quick Start
 
 ```python
-from pdcp import Job, JobConfig
+from pdcp import Job
+from pdcp.types import JobConfig
+from pdcp.utils import work_function
 
 # Define your work function
+@work_function
 def work(x, a):
-    dcp.progress()
     return x * a
 
 # Configure your job
@@ -32,7 +37,7 @@ config: JobConfig = {
     "work_function": work,
     "slices": [1, 2, 3],
     "constant_params": [3],
-    "compute_groups": [{"joinKey": "sheridan", "joinSecret": "dcp"}]
+    "compute_groups": [{"joinKey": "group_name", "joinSecret": "secret"}]
 }
 
 # Create and configure the job
@@ -58,12 +63,13 @@ The `JobConfig` TypedDict provides a type-safe way to configure jobs:
 
 ```python
 class JobConfig(TypedDict):
-    name: str                                        # Name of the job
-    work_function: callable                          # Function to be executed
-    slices: NotRequired[list]                        # Input data slices
-    stream_slices: NotRequired[bool]                 # Enable/disable slice streaming
-    constant_params: NotRequired[list[any]]          # Constant parameters for work function
-    compute_groups: NotRequired[list[ComputeGroup]]  # DCP compute groups
+    name: str                                           # Name of the job
+    work_function: callable                             # Function to be executed
+    slices: NotRequired[list]                           # Input data slices
+    stream_slices: NotRequired[bool]                    # Enable/disable slice streaming
+    constant_params: NotRequired[list[any]]             # Constant parameters for work function
+    compute_groups: NotRequired[list[ComputeGroup]]     # DCP compute groups
+    job_dependencies: NotRequired[list[str]]            # Required local dependencies
 ```
 
 ## Event Handling
@@ -71,14 +77,18 @@ class JobConfig(TypedDict):
 Jobs support various events that can be subscribed to:
 
 ```python
-job.subscribe_to({
-    "readystatechange": handler,  # Job state changes
-    "accepted": handler,          # Job accepted by DCP
-    "result": handler,           # New result available
-    "complete": handler,         # Job completed
-    "console": handler,          # Console output
-    "status": handler            # Status updates
-})
+from pdcp.types import EventHandler
+
+events: EventHandler = {
+    "readystatechange": handler,    # Job state changes
+    "accepted": handler,            # Job accepted by DCP
+    "result": handler,              # New result available
+    "complete": handler,            # Job completed
+    "console": handler,             # Console output
+    "status": handler               # Status updates
+}
+
+job.subscribe_to(events)
 ```
 
 ## Job Chaining
@@ -88,8 +98,9 @@ Basic job chaining is supported through the `chain` method:
 ```python
 # Create and chain jobs
 job1 = Job(config1)
-job2 = Job(config2)
-job1.chain(job2)  # job2 will be executed after job1
+job2 = job1.chain(config2)
+
+job1.dispatch()
 ```
 
 ## Compute Groups
