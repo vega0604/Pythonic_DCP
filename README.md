@@ -11,7 +11,15 @@ PDCP is a Python package that provides a more Pythonic interface to the DCP Pyth
 - **Streaming Slices**: Optional streaming support for job slices
 
 ## Requirements
-PDCP requires a python version between [3.10, 4.0) and the latest node version
+PDCP requires a python version between [3.10, 4.0) and the latest node version.
+
+You also need to have your keystore files located in your home directory as shown below for dcp to identify you.
+
+```
+└── %USERPROFILE%/.dcp
+    ├── default.keystore
+    └── id.keystore
+```
 
 ## Installation
 
