@@ -16,6 +16,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,7 +61,7 @@ jobs:
           git config --global user.email 'github-actions@github.com'
           git add pyproject.toml
           git commit -m "Bump version to ${{ steps.get_version.outputs.version }}"
-          git push
+          git push origin main
         
       - name: Build and publish
         env:
