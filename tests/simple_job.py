@@ -1,5 +1,5 @@
 from pdcp import Job
-from pdcp.types import JobConfig
+from pdcp.custom_types import JobConfig
 from pdcp.utils import work_function
 
 if __name__ == "__main__":
