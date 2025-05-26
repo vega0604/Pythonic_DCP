@@ -11,7 +11,7 @@ PDCP is a Python package that provides a more Pythonic interface to the DCP Pyth
 - **Streaming Slices**: Optional streaming support for job slices
 
 ## Requirements
-PDCP requires a python version between (3.10, 4.0] and the latest node version
+PDCP requires a python version between [3.10, 4.0) and the latest node version
 
 ## Installation
 
@@ -22,13 +22,13 @@ pip install pdcp
 ## Quick Start
 
 ```python
-from pdcp import Job
+from pdcp import Job, dcp
 from pdcp.types import JobConfig
 from pdcp.utils import work_function
 
 # Define your work function
-@work_function
 def work(x, a):
+    dcp.progress()
     return x * a
 
 # Configure your job

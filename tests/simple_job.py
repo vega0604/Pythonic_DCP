@@ -1,12 +1,11 @@
-from pdcp import Job
+from pdcp import Job, dcp
 from pdcp.custom_types import JobConfig
-from pdcp.utils import work_function
 
 if __name__ == "__main__":
-    @work_function
     def work(x: int, a: int) -> int:
+        dcp.progress()
         return x * a
-    
+
     config: JobConfig = {
         "name": "test",
         "work_function": work,

@@ -1,7 +1,6 @@
-import dcp
-dcp.init()
-from .types import JobConfig, ComputeGroup, EventHandler
-from .utils import work_function
+from pdcp import dcp
+from pdcp.custom_types import JobConfig, ComputeGroup, EventHandler
+
 
 class Job:
     '''
@@ -14,25 +13,18 @@ class Job:
     def __init__(self, job_config: JobConfig):
         self.config = job_config
 
-        self.work_function = self.config["work_function"]
         self.name = self.config["name"]
 
+        work_function = self.config["work_function"]
         constant_params = self.config.get("constant_params", [])
         slices = self.config.get("slices", [])
         self.input_count = len(slices)
         
-        self.job = dcp.compute_for(slices, self.work_function, constant_params)
-
-        compute_groups = self.config.get("compute_groups", [])
-        if len(compute_groups) > 0:
-            self.compute_groups = compute_groups
-
-        stream_slices = self.config.get("stream_slices", False)
-        self.job.autoClose = not stream_slices
+        self.job = dcp.compute_for(slices, work_function, constant_params)
+        self.compute_groups = self.config.get("compute_groups", [])
+        self.job.autoClose = not self.config.get("stream_slices", False)
 
         self.results = []
-
-        # self.job.fs.add()
 
         self.subscribe_to({
             "result": lambda e: self.results.append(e.result)
@@ -76,10 +68,10 @@ class Job:
         return job
     
 if __name__ == "__main__":
-    @work_function
     def work(x: int, a: int) -> int:
+        dcp.progress()
         return x * a
-    
+        
     config: JobConfig = {
         "name": "test",
         "work_function": work,
@@ -98,5 +90,3 @@ if __name__ == "__main__":
     job.dispatch()
     results = job.get_results()
     print(results)
-
-
