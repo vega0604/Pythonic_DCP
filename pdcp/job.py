@@ -1,37 +1,7 @@
 import dcp
-# import asyncio
 dcp.init()
-from typing import TypedDict, NotRequired
-
-class ComputeGroup(TypedDict):
-    joinKey: str
-    joinSecret: str
-
-class EventHandler(TypedDict):
-    readystatechange: NotRequired[callable]
-    accepted: NotRequired[callable]
-    result: NotRequired[callable]
-    complete: NotRequired[callable]
-    console: NotRequired[callable]
-    status: NotRequired[callable]
-
-class JobConfig(TypedDict):
-    '''
-    Description:
-        A TypedDict that describes the configuration of a `Job` object.
-
-    Attributes:
-        work_function -> `callable`: function to be executed
-        stream_slices -> `bool`: equivalent to the opposite of `dcp.job.Job.autoClose`
-        constant_params -> `NotRequired[list[any]]`: list of constant parameters for the work function
-        compute_groups -> `NotRequired[list[ComputeGroup]]`: list of compute groups
-    '''
-    name: str
-    work_function: callable
-    slices: NotRequired[list]
-    stream_slices: NotRequired[bool]
-    constant_params: NotRequired[list[any]]
-    compute_groups: NotRequired[list[ComputeGroup]]
+from .types import JobConfig, ComputeGroup, EventHandler
+from .utils import work_function
 
 class Job:
     '''
@@ -43,11 +13,14 @@ class Job:
     '''
     def __init__(self, job_config: JobConfig):
         self.config = job_config
+
         self.work_function = self.config["work_function"]
         self.name = self.config["name"]
+
         constant_params = self.config.get("constant_params", [])
         slices = self.config.get("slices", [])
         self.input_count = len(slices)
+        
         self.job = dcp.compute_for(slices, self.work_function, constant_params)
 
         compute_groups = self.config.get("compute_groups", [])
@@ -58,6 +31,8 @@ class Job:
         self.job.autoClose = not stream_slices
 
         self.results = []
+
+        self.job.fs.add()
 
         self.subscribe_to({
             "result": lambda e: self.results.append(e.result)
@@ -101,12 +76,11 @@ class Job:
         return job
     
 if __name__ == "__main__":
-    print("Starting job...")
-    def work(x, a):
-        dcp.progress()
+    @work_function
+    def work(x: int, a: int) -> int:
         return x * a
     
-    config: JobConfig = {   
+    config: JobConfig = {
         "name": "test",
         "work_function": work,
         "slices": [1, 2, 3],

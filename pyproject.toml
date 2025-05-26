@@ -1,0 +1,18 @@
+[project]
+name = "pdcp"
+version = "0.1.0"
+description = "Pythonic DCP(Bifrost2) Wrapper"
+authors = [
+    {name = "Sebastian Vega",email = "sebasvega4604@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dcp (>=3.2.1,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
