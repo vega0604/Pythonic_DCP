@@ -23,8 +23,7 @@ pip install pdcp
 
 ```python
 from pdcp import Job, dcp
-from pdcp.types import JobConfig
-from pdcp.utils import work_function
+from pdcp.custom_types import JobConfig
 
 # Define your work function
 def work(x, a):
