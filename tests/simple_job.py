@@ -10,8 +10,9 @@ if __name__ == "__main__":
         "name": "test",
         "work_function": work,
         "slices": [1, 2, 3],
+        "expected_output_count": 3,
         "constant_params": [3],
-        "compute_groups": [{"joinKey": "sheridan", "joinSecret": "dcp"}]    
+        "compute_groups": [{"joinKey": "sheridan", "joinSecret": "dcp"}],
     }
 
     job = Job(config)
