@@ -1,3 +1,6 @@
+'''
+Custom Types used in PDCP
+'''
 from typing import TypedDict, NotRequired
 
 class ComputeGroup(TypedDict):
@@ -26,7 +29,7 @@ class JobConfig(TypedDict):
     name: str
     work_function: callable
     slices: NotRequired[list]
-    expected_output_count: int
+    expected_output_count: NotRequired[int]
     stream_slices: NotRequired[bool]
     constant_params: NotRequired[list[any]]
     compute_groups: NotRequired[list[ComputeGroup]]
