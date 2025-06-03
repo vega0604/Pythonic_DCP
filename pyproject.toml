@@ -1,6 +1,6 @@
 [project]
 name = "pdcp"
-version = "1.1.0"
+version = "1.2.0"
 description = "Pythonic DCP(Bifrost2) Wrapper"
 authors = [
     {name = "Sebastian Vega",email = "sebasvega4604@gmail.com"}
