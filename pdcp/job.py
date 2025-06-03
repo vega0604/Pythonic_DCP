@@ -10,25 +10,25 @@ class Job:
     Attributes:
         job_config -> `JobConfig`: configuration of the job
     '''
-    # TODO: CHANGE TO JUST CONFIG, JOB CREATION ON DISPATCH
+    # TODO: ADD INTERCEPTOR LOGIC
     def __init__(self, job_config: JobConfig):
         self.config = job_config
-        self.job = self.create_job()
+        self.job = None
 
-        self.chained_configs: list[JobConfig] = []
         self.chained_jobs: list[Job] = []
 
         self.interceptor: callable | None = None
 
         self.results: JobResult = {"name": self.config["name"], "results": [], "chains": []}
 
-        self.subscribe_to(self.config.get('event_subscriptions', {}))
-
     # def add_slices(self, slices: list):
     #     if self.job.autoClose == False:
     #         dcp.job.addSlices(slices, self.id)
     #     else:
     #         raise Exception("Job is not configured to stream slices")
+
+    def set_slices(self, slices: list):
+        self.config["slices"] = slices
 
     def subscribe_to(self, events: EventHandler):
         if self.job is None:
@@ -38,6 +38,8 @@ class Job:
 
     @property
     def id(self):
+        if self.job is None:
+            raise Exception("Job is unitialized")
         return self.job.id
 
     # def disperse_outputs(self, event):
@@ -60,43 +62,34 @@ class Job:
 
     def dispatch(self):
         # if self.config.get("stream_slices", False):
-        #     self.subscribe_to({
-        #         "result": self.disperse_outputs
-        #     })
-        #     for config in self.chained_configs:
-        #         config["stream_slices"] = True
-        #         job = Job(config)
-        #         self.chained_jobs.append(job)
-        #         job.dispatch()
-
-        #     self.job.exec()
-        # else:
+        #     return self.streamed_dispatch()
+        self.job = self.create_job()
+        self.subscribe_to(self.config.get('event_subscriptions', {}))
         self.job.exec()
+
         job_results = self.job.wait()
         self.results["results"].extend(job_results)
         
-        for config in self.chained_configs:
-            config["slices"] = job_results
-            job = Job(config)
-            chain_results = job.dispatch()
+        for chained_job in self.chained_jobs:
+            chained_job.set_slices(job_results)
+            chain_results = chained_job.dispatch()
             self.results["chains"].append(chain_results)
 
         return self.results
     
     def chain(self, config: JobConfig):
-        # TODO: This is a surface level implementation of chaining jobs
-        # TODO: We need to make this a lot more robust
-        self.chained_configs.append(config)
-        return self
+        job = Job(config)
+        self.chained_jobs.append(job)
+        return job
     
 if __name__ == "__main__":
     def work(x: int, a: int) -> int:
         dcp.progress()
         return x * a
     
-    def work2(x: int):
+    def work2(x: int, a: int):
         dcp.progress()
-        return f"processed: {x} again"
+        return x // a
         
     config: JobConfig = {
         "name": "test",
@@ -117,6 +110,7 @@ if __name__ == "__main__":
         'name': "chained",
         'work_function': work2,
         'expected_output_count': 3,
+        'constant_params': [3],
         'compute_groups': [{"joinKey": "sheridan", "joinSecret": "dcp"}],
         'event_subscriptions': {
             'readystatechange': print,
@@ -127,8 +121,8 @@ if __name__ == "__main__":
 
     job = Job(config)
 
-    job.chain(config2)
-    job.chain(config)
+    job.chain(config2).chain(config)
+    job.chain(config2).chain(config2)
 
     results = job.dispatch()
     print_json(data=results)
