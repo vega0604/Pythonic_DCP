@@ -35,6 +35,7 @@ class JobConfig(TypedDict):
     compute_groups: NotRequired[list[ComputeGroup]]
     job_dependencies: NotRequired[list[str]]
     event_subscriptions: NotRequired[EventHandler]
+    interceptor: NotRequired[callable]
 
 class JobResult(TypedDict):
     name: str

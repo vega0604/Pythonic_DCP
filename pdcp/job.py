@@ -17,7 +17,7 @@ class Job:
 
         self.chained_jobs: list[Job] = []
 
-        self.interceptor: callable | None = None
+        self.interceptor = self.config.get('interceptor', lambda x: x)
 
         self.results: JobResult = {"name": self.config["name"], "results": [], "chains": []}
 
@@ -68,6 +68,7 @@ class Job:
         self.job.exec()
 
         job_results = self.job.wait()
+        job_results = self.interceptor(job_results)
         self.results["results"].extend(job_results)
         
         for chained_job in self.chained_jobs:
